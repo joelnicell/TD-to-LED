@@ -105,6 +105,11 @@ Now, once the code is running on the microcontroller, and the TouchDesigner netw
 This was very satisfying to get working, and the theory of this broadcasting should extend for larger projects as well, for instance to large LED screens.
 I was pleased to learn about all parts of the process, from electronics setup, to network protocals, to writing code for a microcontroller.
 
+
+
+https://github.com/user-attachments/assets/7585e985-4bd3-4fbf-b242-b5dda76356f5
+
+
 ---
 
 ## **Future Improvements**
