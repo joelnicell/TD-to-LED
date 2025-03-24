@@ -1,6 +1,7 @@
 # TD-to-LED
 
 ### Creating RGB in TouchDesigner and Sending Data to Programmable LEDs
+![TD to DMX](https://github.com/user-attachments/assets/a1b5697e-e3ee-47e8-8323-b087e05fba62)
 
 ---
 
