@@ -4,46 +4,40 @@
 
 ---
 
-## Overview
-I wanted to design an RGB lighting setup using **TouchDesigner** for full customization and display it on hardware. My solution was to use **programmable LEDs** connected to a **microcomputer** that can receive DMX data. Since TouchDesigner can output visuals as DMX, I wanted to broadcast this data to the microcontroller.
+### Overview
+I wanted to design an RGB lighting setup using the visual power of **TouchDesigner** for some interesting and customisable visuals. This was to start to understand how DMX works for installations and AV setups, and work out how that works practically in TouchDesigner. My solution was to use small, **programmable LEDs** connected to a microcomputer that can receive DMX data. Having small LEDs means we can broadcast small amounts of data and use Wifi for a minimal home setup.
 
-Once I understood the electronics, I wrote code for the microcontroller to **receive DMX data** and translate it into **RGB values** for the LEDs. The code for this can be found in: `_____`.
+The LED strip receives RGB data only, so the DMX stream will need:
+- R, G, B values for each pixel, for 60 LEDs.
+- A total of 180 DMX channels
 
-Next, I needed to generate the correct **DMX format** from TouchDesigner. Below is the network setup for achieving this.
-
----
-
-## DMX Format for LEDs
-The LED strip receives RGB data only, so the **DMX stream** consists of:
-- **R, G, B values** for each pixel
-- **60 LEDs** → **180 DMX channels** (3 per LED)
-
+### **TouchDesigner Network**
 Here is a screenshot of a simple TouchDesigner network that converts an image into the correct DMX format:
 
 ![TouchDesigner Network](https://github.com/user-attachments/assets/681eddfc-603d-487a-81ae-863f2a069550)
 
-### **Breakdown of the TouchDesigner Network**
-- **Each pixel** in the input image corresponds to an **LED**.
+- Each pixel in the input image corresponds to an LED
+- The input image is 60x1, matching the LED srip
 - `shuffle1` arranges RGB data into a single sequence: `r1, g1, b1, r2, g2, ...`
-- `shuffle2` splits this sequence into **individual DMX channels**.
-- `rename1` renames channels to `ch*` (optional for DMX compliance).
-- `math1` scales values from **TouchDesigner's 0-1 range** to **DMX's 0-255 range** and rounds to integers.
+- `shuffle2` splits this sequence into **individual DMX channels**. We have to use 2 shuffles to get the data in the correct order.
+- `rename1` renames channels to `ch*` (optional, but reflects how DMX data is processed).
+- `math1` scales values from TouchDesigner's 0-1 range to DMX's 0-255 range and rounds to integers.
 
-Final output format:
+Final output format of DMX:
 
 ![DMX Output](https://github.com/user-attachments/assets/b3407530-423b-4b13-873f-f4a1be9314cc)
 
-Now, the data is in the correct DMX format for the LEDs. We use `dmxout` to broadcast it to the **microcontroller's local IP address**.
+Now, the data is in the correct DMX format for the LEDs. We use a `dmxout` node to broadcast it to the **microcontroller's local IP address**.
 
 ---
 
 ## Microcontroller Code (Arduino)
 The microcontroller needs to:
-- **Connect to WiFi**
-- **Use an LED library** compatible with our hardware
-- **Receive DMX data via ArtNet**
+- Connect to WiFi (and tell me it's IP address)
+- Use an LED library compatible with our hardware
+- Receive DMX data via ArtNet
 
-### **Required Libraries**
+### **Setting up Libraries and initialising code**
 ```cpp
 #include <ArtnetWiFi.h>
 #include <WiFi.h>
@@ -85,7 +79,6 @@ FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
 ```cpp
 artnet.begin();
 
-// Subscribe to DMX universe
 artnet.subscribeArtDmxUniverse(universe, [](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote)
 {
     for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel)
@@ -108,20 +101,16 @@ void loop() {
 
 ---
 
-## **Final Results**
-With everything set up, the project works! We can now:
-- **Customize LED visuals in real-time** from TouchDesigner.
-- **Use audio-reactivity** to create dynamic lighting effects.
-- **Stream data wirelessly** to our LEDs.
+Now, once the code is running on the microcontroller, and the TouchDesigner network is open, We can now customize any visual we want from TouchDesigner, including using audio-reactivity, and broadcast to LEDs in real time.
+This was very satisfying to get working, and the theory of this broadcasting should extend for larger projects as well, for instance to large LED screens.
+I was pleased to learn about all parts of the process, from electronics setup, to network protocals, to writing code for a microcontroller.
 
 ---
 
 ## **Future Improvements**
-- **Network Speed:** WiFi works well, but for larger installations, a direct **Ethernet connection** may be needed.
+- WiFi works well, but for larger installations, a direct **Ethernet connection** may be needed.
 
-- **Hardware Durability:** The current setup uses a **breadboard** and **taped wires**. A **soldered circuit** with a protective shell would make it more permanent.
+- The current setup uses a breadboard and taped wires. A **soldered circuit** with a protective shell would make it more permanent.
 
----
-
-- **This project bridges TouchDesigner with LED hardware for real-time generative visuals!**
+- Add more LEDs for a richer visual experience
 
